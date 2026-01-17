@@ -2,7 +2,7 @@ import pool from "../config/db.js";
 
 const initTables = async () => {
   try {
-    console.log(" Initializing DevTech Database...");
+    console.log("Initializing DevTech Database...");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS roles (
         id SERIAL PRIMARY KEY,
@@ -11,13 +11,21 @@ const initTables = async () => {
       );
     `);
     await pool.query(`
+      INSERT INTO roles (id, name, description)
+      VALUES
+        (1, 'admin', 'System administrator'),
+        (2, 'manager', 'Team manager'),
+        (3, 'member', 'Default user role')
+      ON CONFLICT (id) DO NOTHING;
+    `);
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(100) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         full_name VARCHAR(100),
         avatar_url TEXT,
-        role_id INT REFERENCES roles(id),
+        role_id INT NOT NULL DEFAULT 3 REFERENCES roles(id),
         status VARCHAR(20) DEFAULT 'active',
         last_online_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -32,6 +40,7 @@ const initTables = async () => {
         revoked BOOLEAN DEFAULT FALSE
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_sessions (
         user_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -58,7 +67,6 @@ const initTables = async () => {
         PRIMARY KEY (conversation_id, user_id)
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
@@ -79,7 +87,6 @@ const initTables = async () => {
         file_size INT
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS teams (
         id SERIAL PRIMARY KEY,
@@ -88,6 +95,7 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS team_members (
         team_id INT REFERENCES teams(id) ON DELETE CASCADE,
@@ -96,6 +104,7 @@ const initTables = async () => {
         PRIMARY KEY (team_id, user_id)
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS projects (
         id SERIAL PRIMARY KEY,
@@ -105,6 +114,7 @@ const initTables = async () => {
         status VARCHAR(20) DEFAULT 'active'
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -118,6 +128,7 @@ const initTables = async () => {
         due_date DATE
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS task_comments (
         id SERIAL PRIMARY KEY,
@@ -137,12 +148,14 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_tags (
         id SERIAL PRIMARY KEY,
         name VARCHAR(50) UNIQUE NOT NULL
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_tag_map (
         document_id INT REFERENCES documents(id) ON DELETE CASCADE,
@@ -158,6 +171,7 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS ai_messages (
         id SERIAL PRIMARY KEY,
