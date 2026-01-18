@@ -32,26 +32,38 @@ const initTables = async () => {
       );
     `);
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS invites (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        role_id INT REFERENCES roles(id),
+        token TEXT UNIQUE NOT NULL,
+        expired_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_by INT REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
         id SERIAL PRIMARY KEY,
         user_id INT REFERENCES users(id) ON DELETE CASCADE,
-        token TEXT NOT NULL,
+        token TEXT UNIQUE NOT NULL,
         expired_at TIMESTAMP NOT NULL,
         revoked BOOLEAN DEFAULT FALSE
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_sessions (
         user_id INT REFERENCES users(id) ON DELETE CASCADE,
         socket_id TEXT NOT NULL,
-        connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, socket_id)
       );
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS conversations (
         id SERIAL PRIMARY KEY,
-        type VARCHAR(20) NOT NULL,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('private', 'group')),
         name VARCHAR(100),
         created_by INT REFERENCES users(id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -67,17 +79,19 @@ const initTables = async () => {
         PRIMARY KEY (conversation_id, user_id)
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
         conversation_id INT REFERENCES conversations(id) ON DELETE CASCADE,
-        sender_id INT REFERENCES users(id),
+        sender_id INT NOT NULL REFERENCES users(id),
         content TEXT,
         type VARCHAR(20) DEFAULT 'text',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         deleted_at TIMESTAMP
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS message_files (
         id SERIAL PRIMARY KEY,
@@ -95,7 +109,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS team_members (
         team_id INT REFERENCES teams(id) ON DELETE CASCADE,
@@ -104,7 +117,6 @@ const initTables = async () => {
         PRIMARY KEY (team_id, user_id)
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS projects (
         id SERIAL PRIMARY KEY,
@@ -114,7 +126,6 @@ const initTables = async () => {
         status VARCHAR(20) DEFAULT 'active'
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -128,7 +139,6 @@ const initTables = async () => {
         due_date DATE
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS task_comments (
         id SERIAL PRIMARY KEY,
@@ -148,14 +158,12 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_tags (
         id SERIAL PRIMARY KEY,
         name VARCHAR(50) UNIQUE NOT NULL
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_tag_map (
         document_id INT REFERENCES documents(id) ON DELETE CASCADE,
@@ -171,7 +179,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS ai_messages (
         id SERIAL PRIMARY KEY,
