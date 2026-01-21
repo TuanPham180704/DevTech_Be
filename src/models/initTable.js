@@ -1,4 +1,7 @@
 import pool from "../config/db.js";
+import bcrypt from "bcrypt";
+
+const SALT_ROUNDS = 10;
 
 const initTables = async () => {
   try {
@@ -35,6 +38,18 @@ const initTables = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    const adminEmail = "admin@devtech.local";
+    const adminPassword = "admin123";
+    const hashedPassword = await bcrypt.hash(adminPassword, SALT_ROUNDS);
+    await pool.query(
+      `
+      INSERT INTO users (email, password_hash, role_id, status)
+      VALUES ($1, $2, 1, 'active')
+      ON CONFLICT (email) DO NOTHING;
+      `,
+      [adminEmail, hashedPassword],
+    );
+    console.log("Admin user seeded (if not exists)");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS invites (
         id SERIAL PRIMARY KEY,
@@ -85,7 +100,6 @@ const initTables = async () => {
         PRIMARY KEY (conversation_id, user_id)
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
@@ -124,7 +138,6 @@ const initTables = async () => {
         PRIMARY KEY (team_id, user_id)
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS projects (
         id SERIAL PRIMARY KEY,
@@ -137,7 +150,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -255,10 +267,10 @@ const initTables = async () => {
       `CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);`,
     );
 
-    console.log(" DevTech Database initialized successfully (FINAL).");
+    console.log("DevTech Database initialized successfully (FINAL).");
     process.exit(0);
   } catch (err) {
-    console.error(" Init database error:", err);
+    console.error("Init database error:", err);
     process.exit(1);
   }
 };
