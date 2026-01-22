@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import pool from "../config/db";
+import pool from "../config/db.js";
 dotenv.config();
 
 export async function authenticate(req, res, next) {
