@@ -94,14 +94,14 @@ export const sendActivateEmail = async (email, token, fullName) => {
     </p>
 
     <p>
-      Chào mừng bạn đến với DevTech — <b>nơi công nghệ tạo ra giá trị.</b>
+      Chào mừng bạn đến với DevTech — <b>hết nối con người. Xây dựng hệ sinh thái..</b>
     </p>
 
     <hr style="margin:28px 0" />
 
     <!-- HR SIGNATURE -->
     <div style="margin-top:20px">
-      <p style="margin-bottom:4px"><b>Trân trọng,</b></p>
+      <p style="margin-bottom:4px"><b>Trân trọng</b></p>
 
       <p style="margin:0; font-weight:600; color:#111827">
         Phạm Tuấn
