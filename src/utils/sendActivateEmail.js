@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export const sendActivateEmail = async (email, token) => {
+export const sendActivateEmail = async (email, token, fullName) => {
   if (!email) throw new Error("Không có email người nhận");
 
   const transporter = nodemailer.createTransport({
@@ -15,9 +15,11 @@ export const sendActivateEmail = async (email, token) => {
 
   const activateLink = `${process.env.FRONTEND_URL}/activate?token=${encodeURIComponent(token)}`;
 
+  const displayName = fullName || "Anh/Chị";
+
   const emailHtml = `
   <div style="font-family: Arial, sans-serif; line-height:1.7; color:#1f2937; max-width:640px; margin:auto">
-    
+
     <h2 style="color:#2563eb; margin-bottom:4px">
       DevTech Internal System
     </h2>
@@ -27,7 +29,12 @@ export const sendActivateEmail = async (email, token) => {
 
     <hr style="margin:20px 0" />
 
-    <p>Xin chào Bạn, Mình là Phạm Tuấn HR của bộ phận nhân sự Công Ty TNHH DevTech</p>
+    <p>Xin chào <b>${displayName}</b>,</p>
+
+    <p>
+      Mình là <b>Phạm Tuấn</b> – phụ trách Nhân sự tại 
+      <b>Công ty TNHH DevTech</b>.
+    </p>
 
     <p>
       Chúng tôi trân trọng thông báo rằng bạn đã được 
@@ -87,20 +94,37 @@ export const sendActivateEmail = async (email, token) => {
     </p>
 
     <p>
-      Chào mừng bạn đến với DevTech — <b>nơi công nghệ tạo ra giá trị.</b> 
+      Chào mừng bạn đến với DevTech — <b>nơi công nghệ tạo ra giá trị.</b>
     </p>
 
     <hr style="margin:28px 0" />
 
+    <!-- HR SIGNATURE -->
+    <div style="margin-top:20px">
+      <p style="margin-bottom:4px"><b>Trân trọng,</b></p>
+
+      <p style="margin:0; font-weight:600; color:#111827">
+        Phạm Tuấn
+      </p>
+      <p style="margin:0; color:#374151">
+        HR Manager | DevTech
+      </p>
+      <p style="margin:4px 0 0; color:#6b7280; font-size:13px">
+        DevTech — Internal Communication & Work Platform
+      </p>
+    </div>
+
+    <hr style="margin:24px 0" />
+
     <p style="font-size:12px; color:#6b7280">
-      DevTech — Internal Communication & Work Platform<br/>
-      Email này được gửi tự động. Vui lòng không trả lời email này.
+      Email này được gửi tự động từ hệ thống DevTech.<br/>
+      Vui lòng không trả lời email này.
     </p>
   </div>
-`;
+  `;
 
   await transporter.sendMail({
-    from: `"DevTech" <${process.env.EMAIL_USER}>`,
+    from: `"DevTech HR" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Chào mừng bạn đến với DevTech – Kích hoạt tài khoản",
     html: emailHtml,

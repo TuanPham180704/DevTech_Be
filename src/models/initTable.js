@@ -38,9 +38,10 @@ const initTables = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    const adminEmail = "admin@devtech.local";
-    const adminPassword = "admin123";
+    const adminEmail = "tuan@devtech.local";
+    const adminPassword = "admin123@@@";
     const hashedPassword = await bcrypt.hash(adminPassword, SALT_ROUNDS);
+
     await pool.query(
       `
       INSERT INTO users (email, password_hash, role_id, status)
@@ -49,11 +50,13 @@ const initTables = async () => {
       `,
       [adminEmail, hashedPassword],
     );
+
     console.log("Admin user seeded (if not exists)");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS invites (
         id SERIAL PRIMARY KEY,
         email VARCHAR(100) NOT NULL,
+        full_name VARCHAR(100) NOT NULL, 
         role_id INT NOT NULL REFERENCES roles(id),
         token TEXT UNIQUE NOT NULL,
         expired_at TIMESTAMP NOT NULL,
@@ -90,7 +93,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS conversation_members (
         conversation_id INT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
@@ -111,7 +113,6 @@ const initTables = async () => {
         deleted_at TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS message_files (
         id SERIAL PRIMARY KEY,
@@ -129,7 +130,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS team_members (
         team_id INT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
@@ -170,7 +170,6 @@ const initTables = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS task_comments (
         id SERIAL PRIMARY KEY,
@@ -193,7 +192,6 @@ const initTables = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_teams (
         document_id INT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
@@ -201,14 +199,12 @@ const initTables = async () => {
         PRIMARY KEY (document_id, team_id)
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_tags (
         id SERIAL PRIMARY KEY,
         name VARCHAR(50) UNIQUE NOT NULL
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_tag_map (
         document_id INT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
@@ -224,7 +220,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS ai_messages (
         id SERIAL PRIMARY KEY,

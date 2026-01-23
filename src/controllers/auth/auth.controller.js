@@ -20,7 +20,7 @@ export async function loginController(req, res) {
   }
 }
 export async function inviteController(req, res) {
-  const { email, roleId } = req.body;
+  const { email, roleId, fullName } = req.body;
 
   if (!email || !roleId) {
     return res.status(400).json({ message: "Email and roleId are required" });
@@ -30,6 +30,7 @@ export async function inviteController(req, res) {
     const result = await inviteUser({
       email,
       roleId,
+      fullName,
       adminId: req.user.id,
     });
 
@@ -41,14 +42,14 @@ export async function inviteController(req, res) {
   }
 }
 export async function activateController(req, res) {
-  const { token, password } = req.body;
+  const { token, password, fullName } = req.body;
 
   if (!token || !password) {
     return res.status(400).json({ message: "Token and password are required" });
   }
 
   try {
-    const result = await activateAccount(token, password);
+    const result = await activateAccount(token, password, fullName);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(error.status || 500).json({
