@@ -3,13 +3,16 @@ import {
   inviteUser,
   login,
   logout,
+  refreshToken as refreshTokenService,
 } from "../../services/auth/auth.service.js";
 
 export async function loginController(req, res) {
   const { email, password } = req.body;
+
   if (!email || !password) {
-    return res.status(400).json({ msg: "Email and Password are required" });
+    return res.status(400).json({ message: "Email and password are required" });
   }
+
   try {
     const result = await login(email, password);
     return res.status(200).json(result);
@@ -19,6 +22,23 @@ export async function loginController(req, res) {
     });
   }
 }
+export async function refreshTokenController(req, res) {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token is required" });
+  }
+
+  try {
+    const result = await refreshTokenService(refreshToken);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      error: error.message || "Refresh token failed",
+    });
+  }
+}
+
 export async function inviteController(req, res) {
   const { email, roleId, fullName } = req.body;
 
@@ -42,14 +62,16 @@ export async function inviteController(req, res) {
   }
 }
 export async function activateController(req, res) {
-  const { token, password, fullName } = req.body;
+  const { token, password } = req.body;
 
   if (!token || !password) {
-    return res.status(400).json({ message: "Token and password are required" });
+    return res.status(400).json({
+      message: "Token and password are required",
+    });
   }
 
   try {
-    const result = await activateAccount(token, password, fullName);
+    const result = await activateAccount(token, password);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(error.status || 500).json({
@@ -66,7 +88,7 @@ export async function logoutController(req, res) {
 
   try {
     await logout(req.user.id, refreshToken);
-    return res.status(200).json({ message: "Logged out" });
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     return res.status(error.status || 500).json({
       error: error.message || "Logout failed",
