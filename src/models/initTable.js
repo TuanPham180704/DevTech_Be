@@ -13,7 +13,6 @@ const initTables = async () => {
         description TEXT
       );
     `);
-
     await pool.query(`
       INSERT INTO roles (id, name, description)
       VALUES
@@ -29,10 +28,17 @@ const initTables = async () => {
         password_hash TEXT,
         full_name VARCHAR(100),
         avatar_url TEXT,
+        date_of_birth DATE,
+        gender VARCHAR(10)
+          CHECK (gender IN ('male','female','other')),
+        phone VARCHAR(20),
+        address TEXT,
+        bio TEXT,
         role_id INT NOT NULL REFERENCES roles(id),
         status VARCHAR(20) NOT NULL
           CHECK (status IN ('active','inactive','locked'))
           DEFAULT 'active',
+
         last_online_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -41,16 +47,14 @@ const initTables = async () => {
     const adminEmail = "tuan@devtech.local";
     const adminPassword = "admin123@@@";
     const hashedPassword = await bcrypt.hash(adminPassword, SALT_ROUNDS);
-
     await pool.query(
       `
-      INSERT INTO users (email, password_hash, role_id, status)
-      VALUES ($1, $2, 1, 'active')
+      INSERT INTO users (email, password_hash, role_id, status, full_name)
+      VALUES ($1, $2, 1, 'active', 'System Admin')
       ON CONFLICT (email) DO NOTHING;
       `,
       [adminEmail, hashedPassword],
     );
-
     console.log(" Admin user seeded (if not exists)");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS invites (
@@ -84,6 +88,7 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS conversation_members (
         conversation_id INT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
@@ -93,6 +98,7 @@ const initTables = async () => {
         PRIMARY KEY (conversation_id, user_id)
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
@@ -126,12 +132,13 @@ const initTables = async () => {
         team_id INT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
         name VARCHAR(150) NOT NULL,
         description TEXT,
-        status VARCHAR(20) NOT NULL
+        status VARCHAR(20)
           CHECK (status IN ('active','archived'))
           DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -139,10 +146,10 @@ const initTables = async () => {
         title VARCHAR(200) NOT NULL,
         description TEXT,
         assignee_id INT REFERENCES users(id),
-        status VARCHAR(20) NOT NULL
+        status VARCHAR(20)
           CHECK (status IN ('todo','doing','done'))
           DEFAULT 'todo',
-        priority VARCHAR(20) NOT NULL
+        priority VARCHAR(20)
           CHECK (priority IN ('low','medium','high'))
           DEFAULT 'medium',
         position INT DEFAULT 0,
@@ -168,7 +175,7 @@ const initTables = async () => {
         title VARCHAR(200) NOT NULL,
         content_md TEXT,
         author_id INT REFERENCES users(id),
-        visibility VARCHAR(20) NOT NULL
+        visibility VARCHAR(20)
           CHECK (visibility IN ('public','team','private'))
           DEFAULT 'public',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -206,10 +213,10 @@ const initTables = async () => {
       `CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);`,
     );
 
-    console.log("DevTech Database initialized successfully (FINAL)");
+    console.log(" DevTech Database initialized successfully (FINAL)");
     process.exit(0);
   } catch (err) {
-    console.error("Init database error:", err);
+    console.error(" Init database error:", err);
     process.exit(1);
   }
 };
