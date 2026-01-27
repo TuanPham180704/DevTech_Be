@@ -22,7 +22,7 @@ export const sendResetEmail = async (email, token, fullName) => {
   const emailHtml = `
   <div style="font-family: Arial, sans-serif; line-height:1.7; color:#1f2937; max-width:640px; margin:auto">
 
-    <h2 style="color:#dc2626; margin-bottom:4px">
+    <h2 style="color:#2563eb; margin-bottom:4px">
       DevTech Internal System
     </h2>
     <p style="color:#6b7280; margin-top:0">
@@ -49,7 +49,7 @@ export const sendResetEmail = async (email, token, fullName) => {
         style="
           display:inline-block;
           padding:14px 32px;
-          background:#dc2626;
+          background:#2563eb;
           color:#ffffff;
           text-decoration:none;
           border-radius:8px;
@@ -62,7 +62,7 @@ export const sendResetEmail = async (email, token, fullName) => {
       </a>
     </div>
 
-    <div style="background:#fef2f2; padding:16px; border-radius:8px">
+    <div style="background:#f9fafb; padding:16px; border-radius:8px">
       <p style="margin-top:0"><b>Lưu ý bảo mật:</b></p>
       <ul style="margin-bottom:0">
         <li>Liên kết này chỉ có hiệu lực trong vòng <b>1 giờ</b>.</li>

@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth/auth.routes.js";
-
+import profileRoutes from "./routes/profile/profile.routes.js";
 const app = express();
 app.use(cors());
 app.use(morgan("dev"));
@@ -15,5 +15,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes);
 app.use(errorHandler);
 export default app;

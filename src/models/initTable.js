@@ -5,7 +5,7 @@ const SALT_ROUNDS = 10;
 
 const initTables = async () => {
   try {
-    console.log(" Initializing DevTech Database (FINAL – 15 TABLES)");
+    console.log(" Initializing DevTech Database (FINAL)");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS roles (
         id SERIAL PRIMARY KEY,
@@ -13,6 +13,7 @@ const initTables = async () => {
         description TEXT
       );
     `);
+
     await pool.query(`
       INSERT INTO roles (id, name, description)
       VALUES
@@ -35,10 +36,9 @@ const initTables = async () => {
         address TEXT,
         bio TEXT,
         role_id INT NOT NULL REFERENCES roles(id),
-        status VARCHAR(20) NOT NULL
+        status VARCHAR(20)
           CHECK (status IN ('active','inactive','locked'))
           DEFAULT 'active',
-
         last_online_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -47,6 +47,7 @@ const initTables = async () => {
     const adminEmail = "tuan@devtech.local";
     const adminPassword = "admin123@@@";
     const hashedPassword = await bcrypt.hash(adminPassword, SALT_ROUNDS);
+
     await pool.query(
       `
       INSERT INTO users (email, password_hash, role_id, status, full_name)
@@ -55,6 +56,7 @@ const initTables = async () => {
       `,
       [adminEmail, hashedPassword],
     );
+
     console.log(" Admin user seeded (if not exists)");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS invites (
@@ -80,6 +82,16 @@ const initTables = async () => {
       );
     `);
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT UNIQUE NOT NULL,
+        expired_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS conversations (
         id SERIAL PRIMARY KEY,
         type VARCHAR(20) NOT NULL CHECK (type IN ('private','group')),
@@ -88,7 +100,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS conversation_members (
         conversation_id INT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
@@ -98,7 +109,6 @@ const initTables = async () => {
         PRIMARY KEY (conversation_id, user_id)
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
@@ -138,7 +148,6 @@ const initTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -159,7 +168,6 @@ const initTables = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS task_comments (
         id SERIAL PRIMARY KEY,
@@ -182,7 +190,6 @@ const initTables = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS document_teams (
         document_id INT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
