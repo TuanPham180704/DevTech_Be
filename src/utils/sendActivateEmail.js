@@ -94,7 +94,7 @@ export const sendActivateEmail = async (email, token, fullName) => {
     </p>
 
     <p>
-      Chào mừng bạn đến với DevTech — <b>hết nối con người. Xây dựng hệ sinh thái..</b>
+      Chào mừng bạn đến với DevTech — <b>kết nối con người. Xây dựng hệ sinh thái..</b>
     </p>
 
     <hr style="margin:28px 0" />
